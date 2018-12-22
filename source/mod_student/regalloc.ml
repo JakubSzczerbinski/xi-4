@@ -108,14 +108,14 @@ module Make(Toolbox:Iface.COMPILER_TOOLBOX) = struct
 
 
     let simplify =
-      failwith "not yet implemented"
+      failwith "simplify not yet implemented"
 
     (* ------------------------------------------------------------------------
      *  Faza Select
      *)
 
     let select = 
-      failwith "not yet implemented"
+      failwith "select not yet implemented"
 
     (* ------------------------------------------------------------------------
      *  Pętla build-coalesce
@@ -156,7 +156,7 @@ module Make(Toolbox:Iface.COMPILER_TOOLBOX) = struct
 
     let build_register_assignment () =
       let register_assignment : (reg, reg) Hashtbl.t = Hashtbl.create 513 in 
-      failwith "not yet implemented";
+      failwith "register assingnment not yet implemented";
       (* Przejdz tablice register2color_assignment i uzupełnij prawidłowo
        * tablicę register_assignment *)
       register_assignment
