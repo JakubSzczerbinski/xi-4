@@ -1,0 +1,7 @@
+B /home/wieczyk/.opam/4.07.0/lib/ocamlgraph
+B ../../_build/default/source/mod_student/.mod_student.objs
+B ../../_build/default/source/xi_lib/.xi_lib.objs
+S /home/wieczyk/.opam/4.07.0/lib/ocamlgraph
+S .
+S ../xi_lib
+FLG -open Mod_student -w @a-4-29-40-41-42-44-45-48-58-59-60-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -w -39-33-26-27-32-21

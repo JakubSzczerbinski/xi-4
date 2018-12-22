@@ -1,0 +1,15 @@
+(executable 
+    (name xi)
+    (public_name xi)
+    (modes byte)
+    (libraries cmdliner ocamlgraph unix xi_lib dynlink)
+    (package xi)
+)
+(env
+    (dev
+        (flags (:standard -g -w -39-33-26-27))
+    )
+    (release
+        (flags (:standard -w -39-33-26-27))
+    )
+)

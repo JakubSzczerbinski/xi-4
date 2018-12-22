@@ -1,0 +1,15 @@
+B /home/wieczyk/.opam/4.07.0/lib/bytes
+B /home/wieczyk/.opam/4.07.0/lib/cmdliner
+B /home/wieczyk/.opam/4.07.0/lib/ocaml
+B /home/wieczyk/.opam/4.07.0/lib/ocamlgraph
+B /home/wieczyk/.opam/4.07.0/lib/result
+B ../../_build/default/source/xi/.xi.eobjs
+B ../../_build/default/source/xi_lib/.xi_lib.objs
+S /home/wieczyk/.opam/4.07.0/lib/bytes
+S /home/wieczyk/.opam/4.07.0/lib/cmdliner
+S /home/wieczyk/.opam/4.07.0/lib/ocaml
+S /home/wieczyk/.opam/4.07.0/lib/ocamlgraph
+S /home/wieczyk/.opam/4.07.0/lib/result
+S .
+S ../xi_lib
+FLG -w @a-4-29-40-41-42-44-45-48-58-59-60-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -w -39-33-26-27

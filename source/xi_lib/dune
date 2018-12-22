@@ -1,0 +1,9 @@
+(library
+    (name xi_lib)
+    (public_name xi_lib)
+    (libraries ocamlgraph )
+    (modes byte)
+    ; Flaga -linkall potrzebna aby program `xi` był skonsolidowany ze wszystkimi
+    ; plikami znajdującymi się w xi_lib.cma, to jest w tej bibliotece. 
+    (library_flags (-linkall))
+)
