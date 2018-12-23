@@ -105,17 +105,92 @@ module Make(Toolbox:Iface.COMPILER_TOOLBOX) = struct
     (* ------------------------------------------------------------------------
      * Faza simplify
      *)
+    
+    let remove infg r r_to_ns =
+      let ns = RegGraph.succ infg r in
+      Hashtbl.add r_to_ns r ns;
+      RegGraph.remove_vertex infg r
 
+    let restore infg r r_to_ns =
+      let ns = Hashtbl.find r_to_ns r 
+      in 
+      RegGraph.add_vertex infg r;
+      List.iter (fun n -> RegGraph.add_edge infg r n) ns
 
-    let simplify =
-      failwith "simplify not yet implemented"
+    let get_tmp_reg_with_lowest_degree infg =
+      RegGraph.fold_vertex (fun reg maybe_reg -> 
+        match (reg, maybe_reg) with
+        | (REG_Hard _), _ -> maybe_reg
+        | (REG_Spec _), _ -> maybe_reg
+        | r1, None -> Some r1
+        | r1, (Some r2) -> 
+            if RegGraph.in_degree infg r1 > RegGraph.in_degree infg r2 
+            then Some r1 
+            else Some r2
+        )
+      infg None
+
+    let selectSpillCandidate infg spill_costs reg =
+      let spillRate r =
+        (Float.of_int (RegGraph.in_degree infg r)) /. (Float.of_int (Hashtbl.find spill_costs r))
+      in
+      RegGraph.fold_vertex (fun r1 r2 ->
+        if (spillRate r1) > (spillRate r2) then
+          r1
+        else
+          r2
+      ) infg reg
+
+    let is_some = function
+      | Some _ -> true
+      | None -> false
+
+    let simplify infg spill_costs =
+      let n = List.length available_registers in
+      let reg = ref (get_tmp_reg_with_lowest_degree infg) in
+      let stack = Stack.create () in
+      let restoration_table = Hashtbl.create 513 in
+      while is_some !reg do
+        let r = match !reg with
+          | Some r -> r
+          | None -> failwith "What ???" 
+        in
+        let reg_degree = RegGraph.in_degree infg r in
+        (if reg_degree >= n then
+          let r = selectSpillCandidate infg spill_costs r in
+          remove infg r restoration_table;
+          Stack.push r stack
+        else
+          remove infg r restoration_table;
+          Stack.push r stack);
+        reg := get_tmp_reg_with_lowest_degree infg
+      done;
+      stack, restoration_table
 
     (* ------------------------------------------------------------------------
      *  Faza Select
      *)
 
-    let select = 
-      failwith "select not yet implemented"
+    let selectColor reg infg =
+      let notAvailbleColors = 
+        (List.map (fun r -> Hashtbl.find register2color_assignment r)
+        (List.filter (fun r -> Hashtbl.mem register2color_assignment r) (RegGraph.succ infg reg))) 
+      in
+      let colors = List.map (fun r -> Hashtbl.find register2color_assignment r) available_registers in
+      let res = List.filter (fun c -> not (List.mem c notAvailbleColors)) colors in
+      match res with
+      | [] -> None
+      | x::_ -> Hashtbl.add register2color_assignment reg x; Some x
+
+    let rec select infg stack restoration_table =
+      if Stack.is_empty stack then
+        []
+      else
+        let r = Stack.pop stack in
+        restore infg r restoration_table;
+        match selectColor r infg with
+        | None -> r::(select infg stack restoration_table)
+        | _ -> select infg stack restoration_table
 
     (* ------------------------------------------------------------------------
      *  Pętla build-coalesce
@@ -146,17 +221,24 @@ module Make(Toolbox:Iface.COMPILER_TOOLBOX) = struct
       let infg = measure "build-coalescence " build_coalescence_loop in
       let spill_costs = measure "spillcosts" (fun () -> compute_spill_costs infg) in
       (* uruchom fazę simplify/select/spill *)
-
+      let stack, restoration_table = simplify infg spill_costs in
+      let actual_spills = select infg stack restoration_table in
+      (), spill (List.rev actual_spills)
       (* unit na potrzeby interfejsu pomocniczej funkcji loop *)
-      (), true
 
     (* ------------------------------------------------------------------------
      *  Budowanie mapowania rejestrów
      *)
 
     let build_register_assignment () =
-      let register_assignment : (reg, reg) Hashtbl.t = Hashtbl.create 513 in 
-      failwith "register assingnment not yet implemented";
+      let register_assignment : (reg, reg) Hashtbl.t = Hashtbl.create 513 in
+      let seq = Hashtbl.to_seq register2color_assignment in
+      Seq.iter (fun (reg, color) -> 
+        Hashtbl.add 
+          register_assignment 
+          reg 
+          (Hashtbl.find color2register_assignment color)
+      ) seq;
       (* Przejdz tablice register2color_assignment i uzupełnij prawidłowo
        * tablicę register_assignment *)
       register_assignment
